@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PEPROTO Portal</title>
+
+    <!-- Bootstrap & Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background-color: #f4f4f8;
+            text-align: center;
+        }
+
+        .page-container {
+            max-width: 850px;
+            margin: 50px auto;
+            padding: 25px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #005f92;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            letter-spacing: 1.5px;
+            border-bottom: 3px solid #005f92;
+            padding-bottom: 10px;
+        }
+
+        .btn-custom {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #005f92;
+            border-radius: 6px;
+            padding: 12px;
+            width: 100%;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+
+        .btn-custom:hover {
+            background-color: #003f6f;
+        }
+
+        .drop-box {
+            border: 2px dashed #005f92;
+            background-color: #e3f2fd;
+            padding: 30px;
+            margin-top: 20px;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .drop-box:hover {
+            background-color: #b3d9ff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 10px;
+            background-color: #005f92;
+            transition: width 1s;
+        }
+
+        .logo {
+            width: 180px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #007b5e;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Home Page -->
+    <div id="homePage" class="page-container">
+        <img src="https://www.carlogos.org/logo/Tata-logo-2000-2560x1440.png" alt="Company Logo" class="logo">
+        <div class="title">PEPROTO Portal</div>
+        <button class="btn btn-custom" onclick="showPage('productionPage')">Production Format</button>
+        <button class="btn btn-custom" onclick="showPage('toolFormatPage')">Tool Format</button>
+    </div>
+
+    <!-- Production Format Upload Page -->
+    <div id="productionPage" class="hidden page-container">
+        <div class="title">Upload Production Files</div>
+        <div class="drop-box" onclick="document.getElementById('sourceFile').click()">
+            <p>📂 Drag & Drop Source File Here or Click to Upload</p>
+            <input type="file" id="sourceFile" class="hidden" onchange="updateFileName('sourceFile')" />
+        </div>
+        <div class="file-name" id="sourceFileName"></div>
+
+        <div class="drop-box" onclick="document.getElementById('referenceFile').click()">
+            <p>📂 Drag & Drop Production Reference File Here or Click to Upload</p>
+            <input type="file" id="referenceFile" class="hidden" onchange="updateFileName('referenceFile')" />
+        </div>
+        <div class="file-name" id="referenceFileName"></div>
+
+        <button class="btn btn-success w-100 fw-bold mt-4" onclick="processFiles('production')">Process Files</button>
+
+        <!-- Production Format Progress Bar -->
+        <div class="progress-container" id="progressContainerProd">
+            <p>Processing...</p>
+            <div class="progress-bar" id="progressBarProd"></div>
+        </div>
+        <a id="downloadButtonProd" href="#" class="btn btn-info mt-3 hidden">Download Processed File</a>
+    </div>
+
+    <!-- Tool Format Upload Page -->
+    <div id="toolFormatPage" class="hidden page-container">
+        <div class="title">Upload Tool Format Files</div>
+        <div class="drop-box" onclick="document.getElementById('toolSourceFile').click()">
+            <p>📂 Drag & Drop Source File Here or Click to Upload</p>
+            <input type="file" id="toolSourceFile" class="hidden" onchange="updateFileName('toolSourceFile')" />
+        </div>
+        <div class="file-name" id="toolSourceFileName"></div>
+
+        <div class="drop-box" onclick="document.getElementById('toolReferenceFile').click()">
+            <p>📂 Drag & Drop Tool Format Reference File Here or Click to Upload</p>
+            <input type="file" id="toolReferenceFile" class="hidden" onchange="updateFileName('toolReferenceFile')" />
+        </div>
+        <div class="file-name" id="toolReferenceFileName"></div>
+
+        <button class="btn btn-success w-100 fw-bold mt-4" onclick="processFiles('tool')">Process Files</button>
+
+        <!-- Tool Format Progress Bar -->
+        <div class="progress-container" id="progressContainerTool">
+            <p>Processing...</p>
+            <div class="progress-bar" id="progressBarTool"></div>
+        </div>
+        <a id="downloadButtonTool" href="#" class="btn btn-info mt-3 hidden">Download Processed File</a>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.getElementById("homePage").classList.add("hidden");
+            document.getElementById(pageId).classList.remove("hidden");
+        }
+
+        function updateFileName(fileInputId) {
+            const fileInput = document.getElementById(fileInputId);
+            const fileNameDiv = document.getElementById(fileInputId + "Name");
+
+            if (fileInput.files.length > 0) {
+                fileNameDiv.innerHTML = `${fileInput.files[0].name} <span style="color: green;">✔️</span>`;
+            } else {
+                fileNameDiv.innerHTML = "";
+            }
+        }
+
+        function processFiles(formatType) {
+    console.log(`Processing ${formatType} format...`); // Debugging log
+
+    const sourceFile = document.getElementById(formatType === "production" ? "sourceFile" : "toolSourceFile").files[0];
+    const referenceFile = document.getElementById(formatType === "production" ? "referenceFile" : "toolReferenceFile").files[0];
+
+    if (!sourceFile || !referenceFile) {
+        document.getElementById(formatType === "production" ? "statusMessageProd" : "statusMessageTool").textContent = "⚠️ Please upload both files.";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("sourceFile", sourceFile);
+    formData.append("referenceFile", referenceFile);
+    formData.append("formatType", formatType);
+
+    const progressContainer = document.getElementById(formatType === "production" ? "progressContainerProd" : "progressContainerTool");
+    const progressBar = document.getElementById(formatType === "production" ? "progressBarProd" : "progressBarTool");
+    const statusMessage = document.getElementById(formatType === "production" ? "statusMessageProd" : "statusMessageTool");
+    const downloadButton = document.getElementById(formatType === "production" ? "downloadButtonProd" : "downloadButtonTool");
+
+    progressContainer.style.display = "block";
+    progressBar.style.width = "30%"; // Start progress
+
+    fetch("/process", { method: "POST", body: formData })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server Error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            progressBar.style.width = "100%"; // Complete progress
+
+            if (data.status === "success" && data.downloadUrl) {
+                downloadButton.href = data.downloadUrl;
+                downloadButton.classList.remove("hidden");
+                statusMessage.textContent = "✅ Processing complete. Download your file!";
+            } else {
+                throw new Error("Processing failed. No valid response received.");
+            }
+        })
+        .catch(error => {
+            console.error("Upload failed:", error);
+            statusMessage.textContent = "❌ Error processing files! Please try again.";
+        });
+}
+    </script>
+</body>
+</html>
