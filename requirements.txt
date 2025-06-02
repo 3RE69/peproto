@@ -1,3 +1,5 @@
+openpyxl
+tempfile
 flask
 flash
 gunicorn
